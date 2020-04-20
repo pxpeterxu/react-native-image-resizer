@@ -315,23 +315,22 @@ void transformImage(UIImage *image,
         }
     }
 
-    // Do the resizing
+    // Do the resizing if we didn't already get the right-sized photo
     UIImage * scaledImage = image;
 
-    // We don't need this anymore because we rely on loadImageWithURLRequest
-    // to do the actual resizing. It's much better at this than we are.
-    //
-    // UIImage * scaledImage = scaleImage(
-    //     image,
-    //     newSize,
-    //     options[@"mode"],
-    //     [[options objectForKey:@"onlyScaleDown"] boolValue]
-    // );
+    if (scaledImage.size.width != newSize.width || scaledImage.size.height != newSize.height) {
+        scaledImage = scaleImage(
+            image,
+            newSize,
+            options[@"mode"],
+            [[options objectForKey:@"onlyScaleDown"] boolValue]
+        );
+    }
 
-    // if (scaledImage == nil) {
-    //     callback(@[@"Can't resize the image.", @""]);
-    //     return;
-    // }
+    if (scaledImage == nil) {
+        callback(@[@"Can't resize the image.", @""]);
+        return;
+    }
 
 
     NSMutableDictionary *metadata = nil;
@@ -412,6 +411,8 @@ RCT_EXPORT_METHOD(createResizedImage:(NSString *)path
             resizeMode = RCTResizeModeCover;
         }
 
+        // In `stretch` mode, without clipped, we end up with the same effect
+        // as `cover`: the image could be larger than the requested dimensions
         bool clipped = resizeMode == RCTResizeModeStretch;
 
         [[self.bridge moduleForName:@"ImageLoader" lazilyLoadIfNecessary:YES]
