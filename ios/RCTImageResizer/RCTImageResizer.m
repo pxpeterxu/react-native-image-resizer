@@ -216,6 +216,11 @@ UIImage* scaleImage (UIImage* image, CGSize toSize, NSString* mode, bool onlySca
         newSize = CGSizeMake(roundf(imageSize.width * scale), roundf(imageSize.height * scale));
     }
 
+    if (newSize.width == imageSize.width && newSize.height == imageSize.height) {
+        // No resizing needed: save us some work and just return the original
+        return image;
+    }
+
     UIGraphicsBeginImageContextWithOptions(newSize, NO, 1.0);
     [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -315,17 +320,13 @@ void transformImage(UIImage *image,
         }
     }
 
-    // Do the resizing if we didn't already get the right-sized photo
-    UIImage * scaledImage = image;
-
-    if (scaledImage.size.width != newSize.width || scaledImage.size.height != newSize.height) {
-        scaledImage = scaleImage(
-            image,
-            newSize,
-            options[@"mode"],
-            [[options objectForKey:@"onlyScaleDown"] boolValue]
-        );
-    }
+    // Do the resizing
+    UIImage * scaledImage = scaleImage(
+        image,
+        newSize,
+        options[@"mode"],
+        [[options objectForKey:@"onlyScaleDown"] boolValue]
+    );
 
     if (scaledImage == nil) {
         callback(@[@"Can't resize the image.", @""]);
