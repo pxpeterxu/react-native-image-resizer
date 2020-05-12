@@ -29,6 +29,7 @@ if (Platform.OS === 'android') {
           rotation,
           outputPath,
           keepMeta,
+          validatedOptions,
           resolve,
           reject
         );
