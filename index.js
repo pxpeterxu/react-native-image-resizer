@@ -1,5 +1,25 @@
 import { NativeModules, Platform } from 'react-native';
 
+/** Validate `options` object: used by both Android and iOS entry points */
+export function validateOptions(options) {
+  // Validate mode
+  const mode = options.mode || 'stretch';
+  const possibleModes = ['contain', 'cover', 'stretch'];
+  if (possibleModes.indexOf(mode) === -1) {
+    throw new Error(`createResizedImage's options.mode must be one of "${possibleModes.join('", "')}"`);
+  }
+
+  // Validate onlyScaleDown
+  if (options.onlyScaleDown && typeof options.onlyScaleDown !== 'boolean') {
+    throw new Error(`createResizedImage\'s option.onlyScaleDown must be a boolean: got ${options.onlyScaleDown}`);
+  }
+
+  return {
+    mode,
+    onlyScaleDown: !!options.onlyScaleDown,
+  };
+}
+
 const ImageResizerAndroid = NativeModules.ImageResizerAndroid;
 
 let exportObject = {};
