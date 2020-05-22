@@ -63,6 +63,10 @@ const modeOptions = ['contain', 'cover', 'stretch'].map(
   mode => ({ label: mode, value: mode })
 );
 
+const priorityOptions = ['default', 'low', 'high'].map(
+  priority => ({ label: priority, value: priority })
+);
+
 const onlyScaleDownOptions = [false, true].map(
   onlyScaleDown => ({ label: onlyScaleDown.toString(), value: onlyScaleDown })
 );
@@ -79,6 +83,7 @@ export default class ResizerExample extends Component {
     this.state = {
       mode: 'contain',
       onlyScaleDown: false,
+      priority: 'default',
 
       image: null,
 
@@ -115,11 +120,11 @@ export default class ResizerExample extends Component {
   }
 
   resize = () => {
-    const { mode, onlyScaleDown, resizeTargetSize } = this.state;
+    const { mode, onlyScaleDown, resizeTargetSize, priority } = this.state;
 
     this.setState({ resizedImage: null });
 
-    ImageResizer.createResizedImage(this.state.image.uri, resizeTargetSize, resizeTargetSize, 'JPEG', 100, 0, undefined, false, { mode, onlyScaleDown })
+    ImageResizer.createResizedImage(this.state.image.uri, resizeTargetSize, resizeTargetSize, 'JPEG', 100, 0, undefined, false, { mode, onlyScaleDown, priority })
       .then(resizedImage => {
         this.setState({ resizedImage });
       })
@@ -173,6 +178,17 @@ export default class ResizerExample extends Component {
             value={this.state.resizeTargetSize}
             onValueChange={(resizeTargetSize) => this.setState({ resizeTargetSize })}
             items={targetSizeOptions}
+            style={{ viewContainer: styles.pickerView }}
+          />
+        </View>
+
+        <View style={styles.row}>
+          <Text>Priority: </Text>
+
+          <RNPickerSelect
+            value={this.state.priority}
+            onValueChange={(priority) => this.setState({ priority })}
+            items={priorityOptions}
             style={{ viewContainer: styles.pickerView }}
           />
         </View>

@@ -10,9 +10,13 @@
 #if __has_include(<React/RCTBridgeModule.h>)
 #import <React/RCTBridgeModule.h>
 #import <React/RCTImageLoader.h>
+#import <React/RCTResizeMode.h>
+#import <React/RCTLog.h>
 #else
 #import "RCTBridgeModule.h"
 #import "RCTImageLoader.h"
+#import "RCTResizeMode.h"
+#import "RCTLog.h"
 #endif
 
 #import <AssetsLibrary/AssetsLibrary.h>
@@ -382,7 +386,16 @@ RCT_EXPORT_METHOD(createResizedImage:(NSString *)path
                   options:(NSDictionary *)options
                   callback:(RCTResponseSenderBlock)callback)
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    int priority = DISPATCH_QUEUE_PRIORITY_DEFAULT;
+    NSString *priorityStr = options[@"priority"];
+
+    if ([priorityStr isEqualToString:@"high"]) {
+        priority = DISPATCH_QUEUE_PRIORITY_HIGH;
+    } else if ([priorityStr isEqualToString:@"low"]) {
+        priority = DISPATCH_QUEUE_PRIORITY_LOW;
+    }
+
+    dispatch_async(dispatch_get_global_queue(priority, 0), ^{
         CGSize newSize = CGSizeMake(width, height);
 
         //Set image extension
@@ -402,7 +415,6 @@ RCT_EXPORT_METHOD(createResizedImage:(NSString *)path
 
         RCTResizeMode resizeMode = RCTResizeModeContain;
         NSString* mode = options[@"mode"];
-        RCTLog(@"Resizing to %f x %f, %@", newSize.width, newSize.height, mode);
 
         if ([mode isEqualToString:@"stretch"]) {
             resizeMode = RCTResizeModeStretch;

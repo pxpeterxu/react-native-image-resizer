@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Process;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
@@ -58,6 +59,16 @@ public class ImageResizerModule extends ReactContextBaseJavaModule {
         new GuardedAsyncTask<Void, Void>(getReactApplicationContext()) {
             @Override
             protected void doInBackgroundGuarded(Void... params) {
+                final String priority = options.getString("priority");
+                if (priority.equals("high")) {
+                    // This is the highest priority apps can set their own priority to:
+                    // based on the docs, THREAD_PRIORITY_FOREGROUND (-2) can't typically
+                    // be set: https://developer.android.com/reference/android/os/Process#THREAD_PRIORITY_FOREGROUND
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT + Process.THREAD_PRIORITY_MORE_FAVORABLE);
+                } else if (priority.equals("low")) {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                }
+
                 try {
                     createResizedImageWithExceptions(imagePath, newWidth, newHeight, compressFormat, quality, rotation, outputPath, keepMeta, options, successCb, failureCb);
                 }

@@ -14,33 +14,23 @@ export function validateOptions(options) {
     throw new Error(`createResizedImage\'s option.onlyScaleDown must be a boolean: got ${options.onlyScaleDown}`);
   }
 
+  // Validate priority
+  const priority = options.priority || 'default';
+  const possiblePriorities = ['default', 'high', 'low'];
+  if (possiblePriorities.indexOf(priority) === -1) {
+    throw new Error(`createResizedImage's options.priority must be one of "${possiblePriorities.join('", "')}"`);
+  }
+
   return {
     mode,
     onlyScaleDown: !!options.onlyScaleDown,
+    priority,
   };
 }
 
 const ImageResizerAndroid = NativeModules.ImageResizerAndroid;
 
 let exportObject = {};
-
-/** Validate `options` object: used by both Android and iOS entry points */
-function validateOptions(options) {
-  const mode = options.mode || 'stretch';
-  const possibleModes = ['contain', 'cover', 'stretch'];
-  if (possibleModes.indexOf(mode) === -1) {
-    throw new Error(`createResizedImage's options.mode must be one of "${possibleModes.join('", "')}"`);
-  }
-
-  if (options.onlyScaleDown && typeof options.onlyScaleDown !== 'boolean') {
-    throw new Error(`createResizedImage\'s option.onlyScaleDown must be a boolean: got ${options.onlyScaleDown}`);
-  }
-
-  return {
-    mode,
-    onlyScaleDown: !!options.onlyScaleDown,
-  };
-}
 
 if (Platform.OS === 'android') {
   exportObject = {
