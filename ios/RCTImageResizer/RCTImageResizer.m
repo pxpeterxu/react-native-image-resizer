@@ -443,7 +443,9 @@ RCT_EXPORT_METHOD(createResizedImage:(NSString *)path
                 return;
             }
 
-            transformImage(image, path, callback, rotation, newSize, fullPath, format, quality, keepMeta, options);
+            dispatch_async(dispatch_get_global_queue(priority, 0), ^{
+                transformImage(image, path, callback, rotation, newSize, fullPath, format, quality, keepMeta, options);
+            });
         }];
     });
 }
